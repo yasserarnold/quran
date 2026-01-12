@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.DEV
+  ? "/api"
+  : "https://api.alquran.cloud/v1";
 
 const TABS = [
   { id: "mushaf", label: "المصحف" },

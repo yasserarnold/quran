@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-const API_BASE = import.meta.env.DEV
-  ? "/api"
-  : "https://api.alquran.cloud/v1";
+const API_BASE = import.meta.env.DEV ? "/api" : "https://api.alquran.cloud/v1";
 
 const TABS = [
   { id: "mushaf", label: "المصحف" },
@@ -222,10 +220,7 @@ export default function App() {
         const arabicReciters = (recitersRes.data || [])
           .filter((reciter) => reciter.language === "ar")
           .map((reciter) => ({ ...reciter, source: "cloud" }));
-        const combinedReciters = [
-          ...arabicReciters,
-          ...EXTRA_RECITERS,
-        ].filter(
+        const combinedReciters = [...arabicReciters, ...EXTRA_RECITERS].filter(
           (reciter, index, list) =>
             list.findIndex((item) => item.identifier === reciter.identifier) ===
             index
@@ -471,6 +466,11 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (!selectedReciter || !rangeNumbers.length) return;
+    handleLoadAudio();
+  }, [selectedReciter]);
+
+  useEffect(() => {
     if (!audioQueue.length || !audioRef.current) return;
     const current = audioQueue[audioIndex];
     if (current?.audio) {
@@ -590,14 +590,6 @@ export default function App() {
             onChange={setSelectedReciter}
             getLabel={(option) => `${option.name} (${option.englishName})`}
           />
-          <button
-            className="button"
-            type="button"
-            onClick={() => handleLoadAudio()}
-            disabled={audioLoading}
-          >
-            {audioLoading ? "جارٍ تحميل التلاوة..." : "تحميل التلاوة"}
-          </button>
           <div className="audio__player">
             <audio
               ref={audioRef}
@@ -768,7 +760,7 @@ export default function App() {
                     onClick={() => handleLoadAudio(ayah.numberInSurah)}
                   >
                     <div className="ayah__meta">
-                      <span>آية</span>
+                      <span>آية {formatNumber(ayah.numberInSurah)}</span>
                       <strong>
                         {formatNumber(ayah.numberInSurah)} /{" "}
                         {formatNumber(maxAyah)}
@@ -806,7 +798,7 @@ export default function App() {
                 return (
                   <article key={num} className="ayah ayah--tafsir">
                     <div className="ayah__meta">
-                      <span>آية</span>
+                      <span>آية {formatNumber(num)}</span>
                       <strong>
                         {formatNumber(num)} / {formatNumber(maxAyah)}
                       </strong>
@@ -896,9 +888,7 @@ export default function App() {
                   </div>
                   <p className="ayah__text">{item.text}</p>
                   <div className="sajda__type">
-                    {item.sajda?.recommended
-                      ? "سجدة مستحبة"
-                      : "سجدة واجبة"}
+                    {item.sajda?.recommended ? "سجدة مستحبة" : "سجدة واجبة"}
                   </div>
                 </article>
               ))}

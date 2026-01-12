@@ -360,18 +360,8 @@ body {
   border: 2px solid rgba(29, 111, 98, 0.8);
   box-shadow: 0 20px 34px rgba(29, 111, 98, 0.28);
   background: rgba(29, 111, 98, 0.08);
-  position: relative;
-  overflow: hidden;
 }
 
-.ayah--active::before {
-  content: "";
-  position: absolute;
-  inset: 12px auto 12px 12px;
-  width: 5px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #1d6f62 0%, #e08a2e 100%);
-}
 
 .ayah__meta {
   display: flex;

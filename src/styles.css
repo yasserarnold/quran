@@ -200,7 +200,7 @@ body {
 }
 
 .select__option:hover,
-.select__option[aria-selected=\"true\"] {
+.select__option[aria-selected="true"] {
   background: rgba(154, 59, 47, 0.12);
   color: var(--accent);
 }
@@ -345,6 +345,11 @@ body {
   gap: 16px;
 }
 
+.mushaf__cards {
+  display: grid;
+  gap: 16px;
+}
+
 .ayah {
   background: var(--card);
   padding: 18px;
@@ -362,19 +367,30 @@ body {
   background: rgba(29, 111, 98, 0.08);
 }
 
-
 .ayah__meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: var(--muted);
   font-size: 0.95rem;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .ayah__text {
   font-size: 24px;
   line-height: 1.9;
   word-break: break-word;
+}
+
+.ayah__tag {
+  background: rgba(203, 179, 138, 0.45);
+  color: #4d3c26;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-family: "Reem Kufi", sans-serif;
+  white-space: nowrap;
 }
 
 .mushaf {
@@ -393,6 +409,51 @@ body {
   box-shadow: var(--shadow);
 }
 
+.mushaf__summary {
+  display: grid;
+  justify-items: center;
+  margin-right: auto;
+  gap: 8px;
+  background: rgba(203, 179, 138, 0.25);
+  border-radius: 16px;
+  padding: 10px 16px;
+  min-width: 220px;
+}
+
+.mushaf__summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #4d3c26;
+}
+
+.mushaf__summary-label {
+  color: var(--muted);
+}
+
+.mushaf__summary-value {
+  font-family: "Reem Kufi", sans-serif;
+  color: #4d3c26;
+}
+
+.basmala {
+  text-align: center;
+  font-family: "Amiri", serif;
+  font-size: 1.5rem;
+  color: #4d3c26;
+  margin: 16px 0 4px;
+}
+
+.basmalab {
+  text-align: center;
+  font-family: "Amiri", serif;
+  font-size: 2rem;
+  color: #4d3c26;
+  margin: 16px 0 4px;
+}
+
 .mushaf__value {
   background: rgba(154, 59, 47, 0.12);
   color: var(--accent);
@@ -406,16 +467,18 @@ body {
 }
 
 .mushaf__flow {
-  background: var(--card);
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: var(--shadow);
-  line-height: 2;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  line-height: 2.1;
+  direction: rtl;
+  text-align: justify;
 }
 
 .mushaf__flow-segment--active {
-  background: rgba(29, 111, 98, 0.2);
-  border-radius: 8px;
+  background: rgba(29, 111, 98, 0.16);
+  border-radius: 10px;
   padding: 2px 6px;
 }
 
@@ -430,15 +493,15 @@ body {
 }
 
 .mushaf__ayah-number {
-  color: var(--accent);
+  color: var(--accent-2);
   font-weight: 700;
 }
 
 .mushaf__basmala {
   text-align: center;
   font-family: "Amiri", serif;
-  font-size: 1.6rem;
-  color: var(--accent);
+  font-size: 1.7rem;
+  color: var(--accent-2);
 }
 
 .ayah--tafsir p,
@@ -568,4 +631,90 @@ body {
 }
 .mushaf__flow-segment {
   cursor: pointer;
+}
+
+.mushaf__page {
+  position: relative;
+  background: #fdf8e8;
+  border-radius: 22px;
+  padding: 28px 26px 32px;
+  border: 3px solid #9e8c66;
+  box-shadow: 0 20px 40px rgba(78, 60, 32, 0.18);
+  overflow: hidden;
+}
+
+.mushaf__page::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 16px;
+  border: 2px solid #cbb38a;
+  pointer-events: none;
+}
+
+.mushaf__page::after {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border-radius: 12px;
+  border: 1px dashed rgba(115, 91, 49, 0.35);
+  pointer-events: none;
+}
+
+.mushaf__page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: "Reem Kufi", sans-serif;
+  color: #4d3c26;
+  font-size: 0.95rem;
+  margin-bottom: 18px;
+}
+
+.mushaf__page-label {
+  background: rgba(203, 179, 138, 0.35);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.mushaf__page-title {
+  text-align: center;
+  font-family: " cairo", sans-serif;
+  font-size: 1.4rem;
+  color: #4d3c26;
+  padding: 0 16px;
+  margin: 0;
+}
+
+.mushaf__page .mushaf__basmala {
+  margin-bottom: 18px;
+}
+
+.mushaf__page .mushaf__flow-segment--active {
+  background: rgba(140, 185, 108, 0.2);
+}
+
+.mushaf__page .mushaf__ayah-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(203, 179, 138, 0.45);
+  color: #4d3c26;
+  font-size: 0.9em;
+  padding: 0 8px;
+  margin: 0 6px;
+}
+
+@media (max-width: 720px) {
+  .mushaf__page {
+    padding: 22px 18px 28px;
+  }
+
+  .mushaf__page-header {
+    flex-direction: column;
+  }
 }

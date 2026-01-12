@@ -1,180 +1,26 @@
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
-const API_BASE = import.meta.env.DEV ? "/api" : "https://api.alquran.cloud/v1";
-
-const TABS = [
-  { id: "mushaf", label: "المصحف" },
-  { id: "tafsir", label: "التفسير" },
-  { id: "search", label: "بحث شامل" },
-  { id: "sajda", label: "سجدات التلاوة" },
-];
-
-const TAFSIR_EDITIONS = [
-  { id: "ar.muyassar", label: "التفسير الميسر" },
-  { id: "ar.jalalayn", label: "تفسير الجلالين" },
-  { id: "ar.qurtubi", label: "تفسير القرطبي" },
-  { id: "ar.waseet", label: "التفسير الوسيط" },
-  { id: "ar.baghawi", label: "تفسير البغوي" },
-  { id: "ar.miqbas", label: "تنوير المقباس" },
-];
-const MUSHAF_EDITIONS = [
-  { id: "quran-uthmani", label: "الرسم العثماني" },
-  { id: "quran-simple", label: "الرسم المبسّط" },
-  { id: "quran-uthmani-min", label: "عثماني (مختصر)" },
-  { id: "quran-simple-clean", label: "مبسّط (منقّى)" },
-];
-const CDN_BASE = "https://cdn.islamic.network/quran/audio/128";
-const EXTRA_RECITERS = [
-  {
-    identifier: "ar.minshawi",
-    name: "محمد صديق المنشاوي",
-    englishName: "Al-Minshawi",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.husary",
-    name: "محمود خليل الحصري",
-    englishName: "Al-Husary",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.alafasy",
-    name: "مشاري راشد العفاسي",
-    englishName: "Al-Afasy",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.shaatree",
-    name: "أبو بكر الشاطري",
-    englishName: "Al-Shaatree",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.mahermuaiqly",
-    name: "ماهر المعيقلي",
-    englishName: "Al-Muaiqly",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.hudhaify",
-    name: "علي الحذيفي",
-    englishName: "Al-Hudhaify",
-    source: "cdn",
-  },
-  {
-    identifier: "ar.muhammadayyoub",
-    name: "محمد أيوب",
-    englishName: "Muhammad Ayyoub",
-    source: "cdn",
-  },
-];
-
-const fetchJson = async (url) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Request failed: ${res.status}`);
-  }
-  return res.json();
-};
-
-const normalizeArabic = (text = "") =>
-  text
-    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
-    .replace(/ـ/g, "")
-    .replace(/[^\u0600-\u06FF\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const toArabicDigits = (value) =>
-  String(value).replace(/[0-9]/g, (digit) => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]);
-
-const formatNumber = (value) => toArabicDigits(value);
-
-const buildNumberMap = (ayahs = []) => {
-  const map = new Map();
-  ayahs.forEach((ayah) => map.set(ayah.numberInSurah, ayah));
-  return map;
-};
-
-const ARABIC_VARIANTS = {
-  ا: "اٱأإآ",
-  ة: "ةه",
-  ه: "هة",
-  ى: "ىا",
-};
-
-const buildLooseArabicPattern = (phrase) => {
-  let pattern = "^";
-  for (const char of phrase) {
-    if (/\s/.test(char)) {
-      pattern += "\\s*";
-      continue;
-    }
-    const variants = ARABIC_VARIANTS[char] || char;
-    pattern +=
-      `[${variants}]` + "[\\u064B-\\u065F\\u0670\\u06D6-\\u06ED\\u0640]*\\s*";
-  }
-  return new RegExp(pattern, "u");
-};
-
-const BASMALA_PATTERN = buildLooseArabicPattern("بسم الله الرحمن الرحيم");
-
-const stripBasmala = (text) => text.replace(BASMALA_PATTERN, "");
-
-function Select({ label, value, options, onChange, getLabel }) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!containerRef.current?.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find((option) => option.value === value);
-  const selectedLabel = selectedOption
-    ? getLabel(selectedOption)
-    : "اختر من القائمة";
-
-  return (
-    <div className="select" ref={containerRef}>
-      <span className="select__label">{label}</span>
-      <button
-        className="select__button"
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <span className="select__value">{selectedLabel}</span>
-        <span className="select__chevron">▾</span>
-      </button>
-      {open && (
-        <div className="select__menu" role="listbox">
-          {options.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              className="select__option"
-              onClick={() => {
-                onChange(option.value);
-                setOpen(false);
-              }}
-              role="option"
-              aria-selected={option.value === value}
-            >
-              {getLabel(option)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+import Hero from "./components/Hero";
+import AudioSection from "./components/AudioSection";
+import MushafView from "./components/MushafView";
+import TafsirView from "./components/TafsirView";
+import SearchView from "./components/SearchView";
+import SajdaView from "./components/SajdaView";
+import {
+  API_BASE,
+  TABS,
+  TAFSIR_EDITIONS,
+  MUSHAF_EDITIONS,
+  CDN_BASE,
+  EXTRA_RECITERS,
+  JUZ_START_MAPPING,
+} from "./constants";
+import {
+  fetchJson,
+  normalizeArabic,
+  formatNumber,
+  buildNumberMap,
+} from "./utils";
 
 export default function App() {
   const [surahs, setSurahs] = useState([]);
@@ -207,8 +53,10 @@ export default function App() {
   const [sajdaLoading, setSajdaLoading] = useState(false);
   const [sajdaError, setSajdaError] = useState("");
   const [quranCorpus, setQuranCorpus] = useState(null);
+  const [selectedJuz, setSelectedJuz] = useState(null);
 
   const audioRef = useRef(null);
+  const pendingAyahRef = useRef(null);
 
   useEffect(() => {
     const loadBasics = async () => {
@@ -264,8 +112,14 @@ export default function App() {
 
   useEffect(() => {
     if (!surahData?.numberOfAyahs) return;
-    setFromAyah(1);
-    setToAyah(surahData.numberOfAyahs);
+    if (pendingAyahRef.current) {
+      setFromAyah(pendingAyahRef.current);
+      setToAyah(surahData.numberOfAyahs);
+    } else {
+      setFromAyah(1);
+      setToAyah(surahData.numberOfAyahs);
+    }
+    pendingAyahRef.current = null;
   }, [surahData?.numberOfAyahs]);
 
   useEffect(() => {
@@ -380,8 +234,8 @@ export default function App() {
           const words = normalizedText.split(" ").filter(Boolean);
           const isMatch =
             searchMode === "word"
-              ? words.includes(query)
-              : normalizedText.includes(query);
+            ? words.includes(query)
+            : normalizedText.includes(query);
           if (isMatch) {
             matches.push({
               surahNumber: surah.number,
@@ -400,6 +254,25 @@ export default function App() {
       setSearchLoading(false);
     }
   };
+
+  const handleJuzChange = (juzNumber) => {
+    const juzData = JUZ_START_MAPPING.find((j) => j.juz === Number(juzNumber));
+    if (juzData) {
+      pendingAyahRef.current = juzData.ayah;
+      setSelectedSurah(juzData.surah);
+      setSelectedJuz(Number(juzNumber));
+    }
+  };
+
+  const handleSurahChange = (surahNumber) => {
+    setSelectedSurah(surahNumber);
+    setSelectedJuz(null);
+  };
+
+  const selectedReciterData = useMemo(
+    () => reciters.find((item) => item.identifier === selectedReciter),
+    [reciters, selectedReciter]
+  );
 
   const handleLoadAudio = async (startAyah) => {
     if (!selectedReciter || !rangeNumbers.length) return;
@@ -423,7 +296,7 @@ export default function App() {
           )
           .map((ayah) => ({
             numberInSurah: ayah.numberInSurah,
-            audio: `${CDN_BASE}/${reciter.identifier}/${ayah.number}.mp3`,
+            audio: `${reciter.baseUrl || CDN_BASE}/${reciter.identifier}/${ayah.number}.mp3`,
           }));
         setAudioQueue(audioItems);
         if (startAyah) {
@@ -516,133 +389,56 @@ export default function App() {
     setAudioIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  const selectedReciterData = useMemo(
-    () => reciters.find((item) => item.identifier === selectedReciter),
-    [reciters, selectedReciter]
-  );
+  const handleAudioEnded = () => {
+    setIsPlaying(false);
+    setPlaybackProgress(0);
+    if (audioIndex < audioQueue.length - 1) {
+      setAudioIndex(audioIndex + 1);
+    }
+  };
+
   const currentAudio = audioQueue[audioIndex];
   const activeAyahNumber = currentAudio?.numberInSurah;
+  const revelationTypeLabel = useMemo(() => {
+    const type = surahMeta.get(selectedSurah)?.revelationType;
+    if (type === "Meccan") return "مكية";
+    if (type === "Medinan") return "مدنية";
+    return "—";
+  }, [surahMeta, selectedSurah]);
 
   return (
     <div className="page">
-      <header className="hero">
-        <div className="hero__content">
-          <span className="hero__badge">المصحف التفاعلي</span>
-          <h1> القرآن الكريم</h1>
-          <p>
-            منصة عربية حديثة لقراءة القرأن والتدبر- تحديد نطاق الآيات، الاستماع
-            للتلاوة، واستكشاف التفسير وشرح المعاني في تجربة واحدة.
-          </p>
-        </div>
-        <div className="hero__panel">
-          <div className="panel__title"> اختر السورة</div>
-          <div className="panel__grid">
-            <Select
-              label="السورة"
-              value={selectedSurah}
-              options={surahOptions}
-              onChange={(value) => setSelectedSurah(Number(value))}
-              getLabel={(option) =>
-                `${formatNumber(option.number)}. ${option.name} (${
-                  option.englishName
-                })`
-              }
-            />
-            <label className="field">
-              <span>من آية</span>
-              <input
-                type="number"
-                min="1"
-                max={maxAyah}
-                value={fromAyah}
-                onChange={(event) => setFromAyah(Number(event.target.value))}
-              />
-            </label>
-            <label className="field">
-              <span>إلى آية</span>
-              <input
-                type="number"
-                min={fromAyah}
-                max={maxAyah}
-                value={toAyah}
-                onChange={(event) => setToAyah(Number(event.target.value))}
-              />
-            </label>
-            <div className="field field--meta">
-              <span>عدد آيات السورة</span>
-              <strong>{formatNumber(maxAyah)}</strong>
-            </div>
-          </div>
-          {error && <div className="alert">{error}</div>}
-        </div>
-      </header>
+      <Hero
+        surahOptions={surahOptions}
+        selectedSurah={selectedSurah}
+        setSelectedSurah={handleSurahChange}
+        fromAyah={fromAyah}
+        setFromAyah={setFromAyah}
+        toAyah={toAyah}
+        setToAyah={setToAyah}
+        maxAyah={maxAyah}
+        error={error}
+        selectedJuz={selectedJuz}
+        onJuzChange={handleJuzChange}
+      />
 
-      <section className="section">
-        <div className="section__header">
-          <h2>اختر المقرئ </h2>
-          <p>اختر المقرئ ثم استمع إلى الآيات المحددة .</p>
-        </div>
-        <div className="audio">
-          <Select
-            label="المقرئ"
-            value={selectedReciter}
-            options={reciterOptions}
-            onChange={setSelectedReciter}
-            getLabel={(option) => `${option.name} (${option.englishName})`}
-          />
-          <div className="audio__player">
-            <audio
-              ref={audioRef}
-              controls
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onTimeUpdate={updateProgress}
-              onLoadedMetadata={updateProgress}
-              onEnded={() => {
-                setIsPlaying(false);
-                setPlaybackProgress(0);
-                if (audioIndex < audioQueue.length - 1) {
-                  setAudioIndex(audioIndex + 1);
-                }
-              }}
-            />
-            <div className="audio__progress" aria-hidden="true">
-              <div
-                className="audio__progress-bar"
-                style={{ width: `${Math.round(playbackProgress * 100)}%` }}
-              />
-            </div>
-            <div className="audio__controls">
-              <button
-                className="button button--ghost"
-                type="button"
-                onClick={handlePrevAudio}
-                disabled={audioIndex === 0}
-              >
-                السابق
-              </button>
-              <div className="audio__meta">
-                <span>الآية الحالية</span>
-                <strong>
-                  {currentAudio
-                    ? `${formatNumber(
-                        currentAudio.numberInSurah
-                      )} / ${formatNumber(maxAyah)}`
-                    : "-"}
-                </strong>
-              </div>
-              <button
-                className="button button--ghost"
-                type="button"
-                onClick={handleNextAudio}
-                disabled={audioIndex >= audioQueue.length - 1}
-              >
-                التالي
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <AudioSection
+        reciterOptions={reciterOptions}
+        selectedReciter={selectedReciter}
+        setSelectedReciter={setSelectedReciter}
+        audioRef={audioRef}
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+        updateProgress={updateProgress}
+        playbackProgress={playbackProgress}
+        audioIndex={audioIndex}
+        audioQueue={audioQueue}
+        currentAudio={currentAudio}
+        maxAyah={maxAyah}
+        handlePrevAudio={handlePrevAudio}
+        handleNextAudio={handleNextAudio}
+        onAudioEnded={handleAudioEnded}
+      />
 
       <button
         className={`floating-play ${isPlaying ? "floating-play--active" : ""}`}
@@ -685,215 +481,54 @@ export default function App() {
         </div>
 
         {activeTab === "mushaf" && (
-          <div className="mushaf">
-            <div className="mushaf__controls">
-              <Select
-                label="طبعة المصحف"
-                value={selectedMushafEdition}
-                options={mushafOptions}
-                onChange={setSelectedMushafEdition}
-                getLabel={(option) => option.name}
-              />
-              <Select
-                label="طريقة العرض"
-                value={mushafViewMode}
-                options={[
-                  { key: "cards", value: "cards", name: "بطاقات الآيات" },
-                  { key: "flow", value: "flow", name: "نص متصل" },
-                ]}
-                onChange={setMushafViewMode}
-                getLabel={(option) => option.name}
-              />
-              <label className="field">
-                <span>حجم خط المصحف</span>
-                <input
-                  className="slider"
-                  type="range"
-                  min="20"
-                  max="40"
-                  value={mushafFontSize}
-                  onChange={(event) =>
-                    setMushafFontSize(Number(event.target.value))
-                  }
-                />
-              </label>
-              <span className="mushaf__value">
-                {formatNumber(mushafFontSize)}
-              </span>
-            </div>
-            {selectedSurah !== 9 && <div className="mushaf__basmala">﷽</div>}
-            {mushafViewMode === "flow" ? (
-              <div
-                className="mushaf__flow"
-                style={{ fontSize: `${mushafFontSize}px` }}
-              >
-                {rangeAyahs.map((ayah) => (
-                  <span
-                    key={ayah.number}
-                    className={
-                      activeAyahNumber === ayah.numberInSurah
-                        ? "mushaf__flow-segment mushaf__flow-segment--active"
-                        : "mushaf__flow-segment"
-                    }
-                    onClick={() => handleLoadAudio(ayah.numberInSurah)}
-                  >
-                    {selectedSurah !== 1 && ayah.numberInSurah === 1
-                      ? stripBasmala(ayah.text)
-                      : ayah.text}
-                    <span className="mushaf__ayah-number">
-                      {" "}
-                      ﴿{formatNumber(ayah.numberInSurah)}﴾
-                    </span>{" "}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <div className="card-grid">
-                {rangeAyahs.map((ayah) => (
-                  <article
-                    key={ayah.number}
-                    className={
-                      activeAyahNumber === ayah.numberInSurah
-                        ? "ayah ayah--active"
-                        : "ayah"
-                    }
-                    onClick={() => handleLoadAudio(ayah.numberInSurah)}
-                  >
-                    <div className="ayah__meta">
-                      <span>آية {formatNumber(ayah.numberInSurah)}</span>
-                      <strong>
-                        {formatNumber(ayah.numberInSurah)} /{" "}
-                        {formatNumber(maxAyah)}
-                      </strong>
-                    </div>
-                    <p
-                      className="ayah__text"
-                      style={{ fontSize: `${mushafFontSize}px` }}
-                    >
-                      {selectedSurah !== 1 && ayah.numberInSurah === 1
-                        ? stripBasmala(ayah.text)
-                        : ayah.text}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
+          <MushafView
+            selectedMushafEdition={selectedMushafEdition}
+            setSelectedMushafEdition={setSelectedMushafEdition}
+            mushafOptions={mushafOptions}
+            mushafViewMode={mushafViewMode}
+            setMushafViewMode={setMushafViewMode}
+            mushafFontSize={mushafFontSize}
+            setMushafFontSize={setMushafFontSize}
+            surahMeta={surahMeta}
+            selectedSurah={selectedSurah}
+            revelationTypeLabel={revelationTypeLabel}
+            rangeEnd={rangeEnd}
+            rangeAyahs={rangeAyahs}
+            activeAyahNumber={activeAyahNumber}
+            handleLoadAudio={handleLoadAudio}
+            maxAyah={maxAyah}
+          />
         )}
 
         {activeTab === "tafsir" && (
-          <div className="meaning">
-            <div className="meaning__header">
-              <Select
-                label="مصدر التفسير"
-                value={selectedTafsir}
-                options={tafsirOptions}
-                onChange={setSelectedTafsir}
-                getLabel={(option) => option.name}
-              />
-            </div>
-            <div className="card-grid">
-              {rangeNumbers.map((num) => {
-                const tafsir = tafsirMap.get(num);
-                return (
-                  <article key={num} className="ayah ayah--tafsir">
-                    <div className="ayah__meta">
-                      <span>آية {formatNumber(num)}</span>
-                      <strong>
-                        {formatNumber(num)} / {formatNumber(maxAyah)}
-                      </strong>
-                    </div>
-                    <p>{tafsir?.text || "لا يوجد تفسير متاح"}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
+          <TafsirView
+            selectedTafsir={selectedTafsir}
+            setSelectedTafsir={setSelectedTafsir}
+            tafsirOptions={tafsirOptions}
+            rangeNumbers={rangeNumbers}
+            tafsirMap={tafsirMap}
+            maxAyah={maxAyah}
+          />
         )}
 
         {activeTab === "search" && (
-          <div className="search">
-            <form className="search__form" onSubmit={handleSearch}>
-              <input
-                type="text"
-                placeholder="ابحث في كامل المصحف..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
-              <div className="search__modes">
-                <button
-                  type="button"
-                  className={`chip ${
-                    searchMode === "word" ? "chip--active" : ""
-                  }`}
-                  onClick={() => setSearchMode("word")}
-                >
-                  مطابقة كلمة كاملة
-                </button>
-                <button
-                  type="button"
-                  className={`chip ${
-                    searchMode === "partial" ? "chip--active" : ""
-                  }`}
-                  onClick={() => setSearchMode("partial")}
-                >
-                  جزء من الكلمة
-                </button>
-              </div>
-              <button className="button" type="submit" disabled={searchLoading}>
-                {searchLoading ? "جارٍ البحث..." : "بحث"}
-              </button>
-            </form>
-            <div className="search__results">
-              {searchResults.length === 0 && !searchLoading && (
-                <p className="muted">لا توجد نتائج بعد. جرّب كلمة أخرى.</p>
-              )}
-              {searchResults.map((result) => (
-                <article
-                  key={`${result.surahNumber}:${result.numberInSurah}`}
-                  className="ayah"
-                >
-                  <div className="ayah__meta">
-                    <span>
-                      الاية رقم {formatNumber(result.numberInSurah)} من{" "}
-                      {result.surahName}
-                    </span>
-                  </div>
-                  <p className="ayah__text">{result.text}</p>
-                </article>
-              ))}
-            </div>
-          </div>
+          <SearchView
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleSearch={handleSearch}
+            searchMode={searchMode}
+            setSearchMode={setSearchMode}
+            searchLoading={searchLoading}
+            searchResults={searchResults}
+          />
         )}
 
         {activeTab === "sajda" && (
-          <div className="sajda">
-            {sajdaError && <div className="alert">{sajdaError}</div>}
-            {sajdaLoading && <p className="muted">جارٍ تحميل السجدات...</p>}
-            {!sajdaLoading && sajdaList.length === 0 && (
-              <p className="muted">لا توجد سجدات حالياً.</p>
-            )}
-            <div className="card-grid">
-              {sajdaList.map((item) => (
-                <article
-                  key={`${item.surah?.number}:${item.numberInSurah}`}
-                  className="ayah"
-                >
-                  <div className="ayah__meta">
-                    <span>{item.surah?.name || "-"}</span>
-                    <strong>
-                      {formatNumber(item.numberInSurah)} /{" "}
-                      {formatNumber(item.surah?.numberOfAyahs || 0)}
-                    </strong>
-                  </div>
-                  <p className="ayah__text">{item.text}</p>
-                  <div className="sajda__type">
-                    {item.sajda?.recommended ? "سجدة مستحبة" : "سجدة واجبة"}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
+          <SajdaView
+            sajdaError={sajdaError}
+            sajdaLoading={sajdaLoading}
+            sajdaList={sajdaList}
+          />
         )}
       </section>
 

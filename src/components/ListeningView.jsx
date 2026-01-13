@@ -154,8 +154,28 @@ export default function ListeningView({ surahMeta }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           
+
+          <div className="alphabet-nav">
+            {Object.keys(groupedReciters).map(letter => (
+              <button 
+                key={letter} 
+                className="alphabet-btn"
+                onClick={() => {
+                  const element = document.getElementById(`group-${letter}`);
+                  if (element) {
+                    const yOffset = -80; 
+                    const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                  }
+                }}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+          
           {Object.keys(groupedReciters).map(letter => (
-             <div key={letter} className="reciter-group">
+             <div key={letter} id={`group-${letter}`} className="reciter-group">
                 <h3 className="group-letter">{letter}</h3>
                 <div className="reciters-grid">
                   {groupedReciters[letter].map((reciter) => (

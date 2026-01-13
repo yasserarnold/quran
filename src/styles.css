@@ -718,3 +718,290 @@ body {
     flex-direction: column;
   }
 }
+/* Grouping Styles */
+.reciter-group {
+  margin-bottom: 32px;
+}
+
+.group-letter {
+  font-family: "Reem Kufi", sans-serif;
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 16px;
+  border-bottom: 2px solid rgba(154, 59, 47, 0.1);
+  padding-bottom: 8px;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+}
+/* Listening View Styles */
+.listening-view {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reciters-list-container {
+  display: grid;
+  gap: 24px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(30, 26, 20, 0.2);
+  background: #fff;
+  font-family: inherit;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.reciters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.reciter-card {
+  background: var(--card);
+  padding: 24px 20px;
+  border-radius: 24px;
+  border: 1px solid transparent;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.reciter-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+
+.reciter-card h3 {
+  font-family: "Reem Kufi", sans-serif;
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+.reciter-moshaf-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(30, 26, 20, 0.05);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.player-interface {
+  display: grid;
+  gap: 32px;
+}
+
+.back-button {
+  justify-self: start;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: "Reem Kufi", sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 999px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-button:hover {
+  background: rgba(154, 59, 47, 0.1);
+}
+
+.player-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.player-header h2 {
+  font-family: "Reem Kufi", sans-serif;
+  font-size: 2.4rem;
+  color: var(--accent);
+}
+
+.moshaf-select {
+  padding: 10px 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(30, 26, 20, 0.2);
+  background: #fff;
+  font-family: inherit;
+  font-size: 1.1rem;
+  color: var(--ink);
+  direction: rtl;
+  min-width: 200px;
+}
+
+.surahs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 120px;
+}
+
+.surah-btn {
+  background: #fff;
+  border: 1px solid rgba(30, 26, 20, 0.1);
+  padding: 12px 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.surah-btn:hover {
+  background: var(--card-2);
+  transform: translateY(-2px);
+}
+
+.surah-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.surah-btn.active .surah-num {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.surah-num {
+  background: rgba(30, 26, 20, 0.05);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-family: "Reem Kufi", sans-serif;
+}
+
+.sticky-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 250, 242, 0.95);
+  backdrop-filter: blur(16px);
+  padding: 24px 32px;
+  border-top: 1px solid rgba(154, 59, 47, 0.15);
+  box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  z-index: 100;
+  flex-wrap: wrap;
+}
+
+.player-info {
+  text-align: right;
+  min-width: 180px;
+}
+
+.player-info strong {
+  display: block;
+  font-size: 1.2rem;
+  color: var(--accent);
+  font-family: "Reem Kufi", sans-serif;
+  margin-bottom: 4px;
+}
+
+.player-info span {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.main-audio-player {
+  flex: 1;
+  max-width: 600px;
+  height: 48px;
+}
+
+/* Mode Switcher */
+.mode-switcher {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 6px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid rgba(154, 59, 47, 0.1);
+  box-shadow: var(--shadow);
+}
+
+.mode-btn {
+  padding: 10px 32px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: "Reem Kufi", sans-serif;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-btn:hover {
+  background: rgba(154, 59, 47, 0.05);
+  color: var(--accent);
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(154, 59, 47, 0.3);
+}
+
+@media (max-width: 600px) {
+  .sticky-player {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+    bottom: 0;
+  }
+  
+  .player-info {
+    text-align: center;
+    width: 100%;
+  }
+  
+  .main-audio-player {
+    width: 100%;
+  }
+  
+  .surahs-grid {
+    margin-bottom: 160px;
+  }
+}

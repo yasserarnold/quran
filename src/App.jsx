@@ -6,6 +6,7 @@ import MushafView from "./components/MushafView";
 import TafsirView from "./components/TafsirView";
 import SearchView from "./components/SearchView";
 import SajdaView from "./components/SajdaView";
+import ListeningView from "./components/ListeningView";
 import {
   API_BASE,
   TABS,
@@ -23,6 +24,7 @@ import {
 } from "./utils";
 
 export default function App() {
+  const [appMode, setAppMode] = useState("memorization"); // memorization | listening
   const [surahs, setSurahs] = useState([]);
   const [selectedSurah, setSelectedSurah] = useState(1);
   const [fromAyah, setFromAyah] = useState(1);
@@ -139,6 +141,36 @@ export default function App() {
     loadSajda();
   }, []);
 
+  // Sync mode with URL hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash; // #...
+      if (hash.startsWith("#listening")) {
+        setAppMode("listening");
+      } else {
+        setAppMode("memorization");
+      }
+    };
+
+    // Initial check
+    handleHashChange();
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const switchMode = (mode) => {
+    if (mode === "listening") {
+      window.location.hash = "listening";
+    } else {
+      // Remove hash for memorization (default)
+      // We use pushState to clear the hash but keep history clean-ish
+      // or just set hash to empty string
+      window.location.hash = "";
+      setAppMode("memorization");
+    }
+  };
+
   const maxAyah = surahData?.numberOfAyahs || 1;
   const rangeStart = Math.min(Math.max(fromAyah, 1), maxAyah);
   const rangeEnd = Math.min(Math.max(toAyah, rangeStart), maxAyah);
@@ -200,6 +232,7 @@ export default function App() {
         key: edition.id,
         value: edition.id,
         name: edition.label,
+        englishName: edition.englishName,
       })),
     []
   );
@@ -210,6 +243,7 @@ export default function App() {
         key: edition.id,
         value: edition.id,
         name: edition.label,
+        englishName: edition.englishName,
       })),
     []
   );
@@ -408,47 +442,147 @@ export default function App() {
 
   return (
     <div className="page">
-      <Hero
-        surahOptions={surahOptions}
-        selectedSurah={selectedSurah}
-        setSelectedSurah={handleSurahChange}
-        fromAyah={fromAyah}
-        setFromAyah={setFromAyah}
-        toAyah={toAyah}
-        setToAyah={setToAyah}
-        maxAyah={maxAyah}
-        error={error}
-        selectedJuz={selectedJuz}
-        onJuzChange={handleJuzChange}
-      />
+      <div className="mode-switcher">
+        <button 
+          type="button" 
+          className={`mode-btn ${appMode === "memorization" ? "active" : ""}`}
+          onClick={() => switchMode("memorization")}
+        >
+          تحفيظ
+        </button>
+        <button 
+          type="button" 
+          className={`mode-btn ${appMode === "listening" ? "active" : ""}`}
+          onClick={() => switchMode("listening")}
+        >
+          استماع
+        </button>
+      </div>
 
-      <AudioSection
-        reciterOptions={reciterOptions}
-        selectedReciter={selectedReciter}
-        setSelectedReciter={setSelectedReciter}
-        audioRef={audioRef}
-        isPlaying={isPlaying}
-        setIsPlaying={setIsPlaying}
-        updateProgress={updateProgress}
-        playbackProgress={playbackProgress}
-        audioIndex={audioIndex}
-        audioQueue={audioQueue}
-        currentAudio={currentAudio}
-        maxAyah={maxAyah}
-        handlePrevAudio={handlePrevAudio}
-        handleNextAudio={handleNextAudio}
-        onAudioEnded={handleAudioEnded}
-      />
+      {appMode === "memorization" && (
+        <>
+          <Hero
+            surahOptions={surahOptions}
+            selectedSurah={selectedSurah}
+            setSelectedSurah={handleSurahChange}
+            fromAyah={fromAyah}
+            setFromAyah={setFromAyah}
+            toAyah={toAyah}
+            setToAyah={setToAyah}
+            maxAyah={maxAyah}
+            error={error}
+            selectedJuz={selectedJuz}
+            onJuzChange={handleJuzChange}
+          />
 
-      <button
-        className={`floating-play ${isPlaying ? "floating-play--active" : ""}`}
-        type="button"
-        onClick={togglePlayback}
-        disabled={!currentAudio?.audio}
-        aria-label={isPlaying ? "إيقاف مؤقت" : "تشغيل"}
-      >
-        {isPlaying ? "إيقاف" : "تشغيل"}
-      </button>
+          <AudioSection
+            reciterOptions={reciterOptions}
+            selectedReciter={selectedReciter}
+            setSelectedReciter={setSelectedReciter}
+            audioRef={audioRef}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
+            updateProgress={updateProgress}
+            playbackProgress={playbackProgress}
+            audioIndex={audioIndex}
+            audioQueue={audioQueue}
+            currentAudio={currentAudio}
+            maxAyah={maxAyah}
+            handlePrevAudio={handlePrevAudio}
+            handleNextAudio={handleNextAudio}
+            onAudioEnded={handleAudioEnded}
+          />
+
+          <button
+            className={`floating-play ${isPlaying ? "floating-play--active" : ""}`}
+            type="button"
+            onClick={togglePlayback}
+            disabled={!currentAudio?.audio}
+            aria-label={isPlaying ? "إيقاف مؤقت" : "تشغيل"}
+          >
+            {isPlaying ? "إيقاف" : "تشغيل"}
+          </button>
+
+          <section className="section">
+            <div className="section__header">
+              <h2>محتوى المصحف والتفسير</h2>
+              <p>
+                تنقل بين المصحف، التفسير، وشرح المعاني، أو استخدم البحث الشامل
+                للوصول السريع للآيات.
+              </p>
+            </div>
+            <div className="tabs">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`tab ${activeTab === tab.id ? "tab--active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "mushaf" && (
+              <MushafView
+                selectedMushafEdition={selectedMushafEdition}
+                setSelectedMushafEdition={setSelectedMushafEdition}
+                mushafOptions={mushafOptions}
+                mushafViewMode={mushafViewMode}
+                setMushafViewMode={setMushafViewMode}
+                mushafFontSize={mushafFontSize}
+                setMushafFontSize={setMushafFontSize}
+                surahMeta={surahMeta}
+                selectedSurah={selectedSurah}
+                revelationTypeLabel={revelationTypeLabel}
+                rangeEnd={rangeEnd}
+                rangeAyahs={rangeAyahs}
+                activeAyahNumber={activeAyahNumber}
+                handleLoadAudio={handleLoadAudio}
+                maxAyah={maxAyah}
+              />
+            )}
+
+            {activeTab === "tafsir" && (
+              <TafsirView
+                selectedTafsir={selectedTafsir}
+                setSelectedTafsir={setSelectedTafsir}
+                tafsirOptions={tafsirOptions}
+                rangeNumbers={rangeNumbers}
+                tafsirMap={tafsirMap}
+                maxAyah={maxAyah}
+              />
+            )}
+
+            {activeTab === "search" && (
+              <SearchView
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleSearch={handleSearch}
+                searchMode={searchMode}
+                setSearchMode={setSearchMode}
+                searchLoading={searchLoading}
+                searchResults={searchResults}
+              />
+            )}
+
+            {activeTab === "sajda" && (
+              <SajdaView
+                sajdaError={sajdaError}
+                sajdaLoading={sajdaLoading}
+                sajdaList={sajdaList}
+              />
+            )}
+          </section>
+        </>
+      )}
+
+      {appMode === "listening" && (
+        <>
+            <ListeningView surahMeta={surahMeta} />
+        </>
+      )}
 
       <button
         className={`scroll-top ${showScrollTop ? "" : "scroll-top--hidden"}`}
@@ -458,79 +592,6 @@ export default function App() {
       >
         ↑
       </button>
-
-      <section className="section">
-        <div className="section__header">
-          <h2>محتوى المصحف والتفسير</h2>
-          <p>
-            تنقل بين المصحف، التفسير، وشرح المعاني، أو استخدم البحث الشامل
-            للوصول السريع للآيات.
-          </p>
-        </div>
-        <div className="tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`tab ${activeTab === tab.id ? "tab--active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === "mushaf" && (
-          <MushafView
-            selectedMushafEdition={selectedMushafEdition}
-            setSelectedMushafEdition={setSelectedMushafEdition}
-            mushafOptions={mushafOptions}
-            mushafViewMode={mushafViewMode}
-            setMushafViewMode={setMushafViewMode}
-            mushafFontSize={mushafFontSize}
-            setMushafFontSize={setMushafFontSize}
-            surahMeta={surahMeta}
-            selectedSurah={selectedSurah}
-            revelationTypeLabel={revelationTypeLabel}
-            rangeEnd={rangeEnd}
-            rangeAyahs={rangeAyahs}
-            activeAyahNumber={activeAyahNumber}
-            handleLoadAudio={handleLoadAudio}
-            maxAyah={maxAyah}
-          />
-        )}
-
-        {activeTab === "tafsir" && (
-          <TafsirView
-            selectedTafsir={selectedTafsir}
-            setSelectedTafsir={setSelectedTafsir}
-            tafsirOptions={tafsirOptions}
-            rangeNumbers={rangeNumbers}
-            tafsirMap={tafsirMap}
-            maxAyah={maxAyah}
-          />
-        )}
-
-        {activeTab === "search" && (
-          <SearchView
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            handleSearch={handleSearch}
-            searchMode={searchMode}
-            setSearchMode={setSearchMode}
-            searchLoading={searchLoading}
-            searchResults={searchResults}
-          />
-        )}
-
-        {activeTab === "sajda" && (
-          <SajdaView
-            sajdaError={sajdaError}
-            sajdaLoading={sajdaLoading}
-            sajdaList={sajdaList}
-          />
-        )}
-      </section>
 
       <footer className="footer">
         <p>

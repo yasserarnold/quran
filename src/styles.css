@@ -567,9 +567,8 @@ body {
 
 .floating-play {
   position: fixed;
-  left: 50%;
-  bottom: 28px;
-  transform: translateX(-50%);
+  right: 24px;
+  bottom: 24px;
   border: none;
   background: var(--accent);
   color: #fff;

@@ -603,7 +603,7 @@ body {
   font-size: 1.2rem;
   cursor: pointer;
   box-shadow: var(--shadow);
-  z-index: 30;
+  z-index: 200;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 

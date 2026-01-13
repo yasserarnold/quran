@@ -11,6 +11,7 @@ export default function ListeningView({ surahMeta }) {
   const [selectedReciter, setSelectedReciter] = useState(null);
   const [selectedMoshaf, setSelectedMoshaf] = useState(null);
   const [currentSurah, setCurrentSurah] = useState(null); // { id, name, url }
+  const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -128,6 +129,15 @@ export default function ListeningView({ surahMeta }) {
     setSelectedMoshaf(moshaf);
     setCurrentSurah(null);
   };
+  
+  const togglePlayback = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      audioRef.current.play().catch(() => undefined);
+    } else {
+      audioRef.current.pause();
+    }
+  };
 
   if (loading && !reciters.length) return <div className="loading">جاري تحميل القراء...</div>;
   if (error) return <div className="error">{error}</div>;
@@ -209,13 +219,32 @@ export default function ListeningView({ surahMeta }) {
           </div>
           
           {currentSurah && (
-            <div className="sticky-player">
-                <div className="player-info">
-                    <strong>{currentSurah.name}</strong>
-                    <span>{selectedReciter.name}</span>
+            <>
+                <div className="sticky-player">
+                    <div className="player-info">
+                        <strong>{currentSurah.name}</strong>
+                        <span>{selectedReciter.name}</span>
+                    </div>
+                    <audio 
+                        ref={audioRef} 
+                        controls 
+                        autoPlay 
+                        className="main-audio-player" 
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => setIsPlaying(false)}
+                    />
                 </div>
-                <audio ref={audioRef} controls autoPlay className="main-audio-player" />
-            </div>
+                <button
+                    className={`floating-play ${isPlaying ? "floating-play--active" : ""}`}
+                    type="button"
+                    onClick={togglePlayback}
+                    aria-label={isPlaying ? "إيقاف مؤقت" : "تشغيل"}
+                    style={{ zIndex: 101 }}
+                >
+                    {isPlaying ? "إيقاف" : "تشغيل"}
+                </button>
+            </>
           )}
         </div>
       )}

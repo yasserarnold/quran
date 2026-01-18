@@ -116,6 +116,29 @@ export default function RecitationView({
       const allWords = normalizeForMatching(transcript).split(/\s+/).filter(Boolean);
       const validWords = allWords.slice(wordsConsumedInCurrentResult);
 
+      // Fuzzy match function - allows up to 2 character differences for words > 3 chars
+      const fuzzyMatch = (spoken, expected) => {
+        if (spoken === expected) return true;
+        if (Math.abs(spoken.length - expected.length) > 2) return false;
+        
+        // For short words, require exact match
+        if (expected.length <= 3) return spoken === expected;
+        
+        // Count differences (simple Levenshtein-like check)
+        let differences = 0;
+        const maxLen = Math.max(spoken.length, expected.length);
+        const minLen = Math.min(spoken.length, expected.length);
+        
+        for (let j = 0; j < minLen; j++) {
+          if (spoken[j] !== expected[j]) differences++;
+        }
+        differences += (maxLen - minLen);
+        
+        // Allow up to 2 differences for words longer than 4 chars
+        const allowedDiff = expected.length > 5 ? 2 : 1;
+        return differences <= allowedDiff;
+      };
+
       let i = 0;
       while (i < validWords.length) {
         const currentIdx = matchedCountRef.current;
@@ -125,8 +148,8 @@ export default function RecitationView({
         const expected = target.match;
         const word = validWords[i];
 
-        // Direct match
-        if (word === expected) {
+        // Direct match or fuzzy match
+        if (word === expected || fuzzyMatch(word, expected)) {
           matchedCountRef.current++;
           setMatchedWords(prev => [...prev, target]);
           wordsConsumedInCurrentResult++;
@@ -141,9 +164,10 @@ export default function RecitationView({
         let lookahead = 1;
         let foundCombinedMatch = false;
         
-        while (i + lookahead < validWords.length && combined.length < expected.length + 3) {
+        while (i + lookahead < validWords.length && combined.length < expected.length + 5) {
           combined += validWords[i + lookahead];
-          if (normalizeForMatching(combined) === expected) {
+          const normalizedCombined = normalizeForMatching(combined);
+          if (normalizedCombined === expected || fuzzyMatch(normalizedCombined, expected)) {
             // Found a match by combining words
             matchedCountRef.current++;
             setMatchedWords(prev => [...prev, target]);
@@ -159,20 +183,36 @@ export default function RecitationView({
         if (foundCombinedMatch) continue;
 
         // Check if word is a prefix of expected (partial speech)
-        if (expected.startsWith(word) && !isFinal && word.length < expected.length) {
-          // Wait for more input
-          break;
+        if (expected.startsWith(word) && word.length >= 2) {
+          // Wait for more input - don't error on partial matches
+          if (!isFinal) break;
         }
 
         // Check if expected starts with word (word is first part of expected)
-        // Don't error yet - wait for next words that might complete it
-        if (expected.startsWith(word) && i === validWords.length - 1 && !isFinal) {
+        if (expected.startsWith(word) && i === validWords.length - 1) {
           // Word could be start of a split, wait
           break;
         }
 
-        // Wrong word
-        playErrorSound();
+        // Check if word contains most of expected (speech might add extra)
+        if (word.includes(expected) || expected.includes(word)) {
+          matchedCountRef.current++;
+          setMatchedWords(prev => [...prev, target]);
+          wordsConsumedInCurrentResult++;
+          setErrorWord(null);
+          i++;
+          continue;
+        }
+
+        // For short words or interim results, just skip without error
+        if (word.length <= 3 || !isFinal) {
+          i++;
+          wordsConsumedInCurrentResult++;
+          continue;
+        }
+
+        // Only show error for very clear mismatches on final results
+        // No sound - just visual indicator
         setErrorWord(word);
         wordsConsumedInCurrentResult++;
         i++;

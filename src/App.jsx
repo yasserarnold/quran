@@ -7,6 +7,7 @@ import TafsirView from "./components/TafsirView";
 import SearchView from "./components/SearchView";
 import SajdaView from "./components/SajdaView";
 import ListeningView from "./components/ListeningView";
+import RecitationView from "./components/RecitationView";
 import {
   API_BASE,
   TABS,
@@ -147,6 +148,8 @@ export default function App() {
       const hash = window.location.hash; // #...
       if (hash.startsWith("#listening")) {
         setAppMode("listening");
+      } else if (hash.startsWith("#recitation")) {
+        setAppMode("recitation");
       } else {
         setAppMode("memorization");
       }
@@ -162,10 +165,11 @@ export default function App() {
   const switchMode = (mode) => {
     if (mode === "listening") {
       window.location.hash = "listening";
+      setAppMode("listening");
+    } else if (mode === "recitation") {
+      window.location.hash = "recitation";
+      setAppMode("recitation");
     } else {
-      // Remove hash for memorization (default)
-      // We use pushState to clear the hash but keep history clean-ish
-      // or just set hash to empty string
       window.location.hash = "";
       setAppMode("memorization");
     }
@@ -452,6 +456,13 @@ export default function App() {
         </button>
         <button 
           type="button" 
+          className={`mode-btn ${appMode === "recitation" ? "active" : ""}`}
+          onClick={() => switchMode("recitation")}
+        >
+          تسميع
+        </button>
+        <button 
+          type="button" 
           className={`mode-btn ${appMode === "listening" ? "active" : ""}`}
           onClick={() => switchMode("listening")}
         >
@@ -459,21 +470,25 @@ export default function App() {
         </button>
       </div>
 
+      {(appMode === "memorization" || appMode === "recitation") && (
+        <Hero
+          surahOptions={surahOptions}
+          selectedSurah={selectedSurah}
+          setSelectedSurah={handleSurahChange}
+          fromAyah={fromAyah}
+          setFromAyah={setFromAyah}
+          toAyah={toAyah}
+          setToAyah={setToAyah}
+          maxAyah={maxAyah}
+          error={error}
+          selectedJuz={selectedJuz}
+          onJuzChange={handleJuzChange}
+        />
+      )}
+
       {appMode === "memorization" && (
         <>
-          <Hero
-            surahOptions={surahOptions}
-            selectedSurah={selectedSurah}
-            setSelectedSurah={handleSurahChange}
-            fromAyah={fromAyah}
-            setFromAyah={setFromAyah}
-            toAyah={toAyah}
-            setToAyah={setToAyah}
-            maxAyah={maxAyah}
-            error={error}
-            selectedJuz={selectedJuz}
-            onJuzChange={handleJuzChange}
-          />
+          {/* Audio Section Moved Here */}
 
           <AudioSection
             reciterOptions={reciterOptions}
@@ -576,6 +591,19 @@ export default function App() {
             )}
           </section>
         </>
+      )}
+
+
+
+      {appMode === "recitation" && (
+        <section className="section">
+          <RecitationView
+            surahName={surahMeta.get(selectedSurah)?.name}
+            rangeAyahs={rangeAyahs}
+            fromAyah={fromAyah}
+            toAyah={toAyah}
+          />
+        </section>
       )}
 
       {appMode === "listening" && (

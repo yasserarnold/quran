@@ -6,13 +6,29 @@ export const fetchJson = async (url) => {
   return res.json();
 };
 
-export const normalizeArabic = (text = "") =>
+const normalizeArabic = (text = "") =>
   text
     .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
     .replace(/ـ/g, "")
     .replace(/[^\u0600-\u06FF\s]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+
+export { normalizeArabic };
+
+export const normalizeForMatching = (text = "") => {
+  return text
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "") // remove diacritics
+    .replace(/ـ/g, "") // remove tatweel
+    .replace(/[أإآٱءؤئ]/g, "ا") // unify ALL hamza forms to alef
+    .replace(/[ىي]/g, "ي") // unify ya forms
+    .replace(/ة/g, "ه") // ta marbuta to ha
+    .replace(/[^\u0600-\u06FF\s]/g, "") // remove non-arabic
+    .replace(/\s+/g, " ")
+    .replace(/ا+/g, "ا") // collapse repeated alefs
+    .replace(/و+/g, "و") // collapse repeated waws
+    .trim();
+};
 
 export const toArabicDigits = (value) =>
   String(value).replace(/[0-9]/g, (digit) => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]);

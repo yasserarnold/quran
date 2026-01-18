@@ -1045,3 +1045,223 @@ body {
     margin-bottom: 180px;
   }
 }
+
+/* Recitation Mode Styles */
+.recitation-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  animation: fadeIn 0.4s ease;
+}
+
+.recitation-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  padding: 16px 24px;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.recitation-stats {
+  font-family: "Cairo", sans-serif;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.recitation-paper {
+  position: relative;
+  background: #fdf8e8;
+  border-radius: 22px;
+  padding: 40px 36px 48px;
+  border: 3px solid #9e8c66;
+  box-shadow: 0 20px 40px rgba(78, 60, 32, 0.18);
+  overflow: hidden;
+  min-height: 450px;
+}
+
+.recitation-paper::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 16px;
+  border: 2px solid #cbb38a;
+  pointer-events: none;
+}
+
+.recitation-paper::after {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border-radius: 12px;
+  border: 1px dashed rgba(115, 91, 49, 0.35);
+  pointer-events: none;
+}
+
+.recitation-text {
+  font-size: 1.8rem;
+  line-height: 2.4;
+  text-align: justify;
+  direction: rtl;
+  color: #1e1a14;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  display: inline;
+}
+
+.recitation-word {
+  display: inline;
+  animation: wordAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.recitation-word {
+  display: inline-block;
+  animation: wordAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes wordAppear {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.recitation-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 1.2rem;
+  pointer-events: none;
+  font-family: "Cairo", sans-serif;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.8rem;
+  background: var(--accent);
+  margin-right: 4px;
+  vertical-align: middle;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.recitation-feedback {
+  margin-top: 16px;
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+  padding: 8px 16px;
+  border-radius: 999px;
+  display: inline-block;
+  font-family: "Cairo", sans-serif;
+  font-size: 0.9rem;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.error-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-51%, 0, 0); }
+  20%, 80% { transform: translate3d(-49%, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-52%, 0, 0); }
+  40%, 60% { transform: translate3d(-48%, 0, 0); }
+}
+
+/* Recitation Ayah Styles - Mushaf Flow */
+.recitation-ayahs {
+  display: block;
+  position: relative;
+  z-index: 1;
+  text-align: justify;
+  direction: rtl;
+  font-size: 1.8rem;
+  line-height: 2.4;
+}
+
+.recitation-ayah {
+  display: inline;
+}
+
+.recitation-ayah {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: rgba(255,255,255, 0.5);
+  border-radius: 16px;
+  border-right: 4px solid var(--accent-2);
+  animation: ayahSlideIn 0.4s ease both;
+}
+
+@keyframes ayahSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.recitation-ayah--current {
+  background: rgba(29, 111, 98, 0.08);
+  border-right-color: var(--accent);
+}
+
+.recitation-ayah-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(203, 179, 138, 0.5);
+  color: #4d3c26;
+  font-family: "Cairo", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0 6px;
+  vertical-align: middle;
+  border: 1px solid rgba(158, 140, 102, 0.5);
+}
+
+.recitation-ayah-number--current {
+  background: rgba(154, 59, 47, 0.15);
+  color: #9a3b2f;
+  border-color: rgba(154, 59, 47, 0.3);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(154, 59, 47, 0.3); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(154, 59, 47, 0); }
+}
+
+.recitation-ayah .recitation-text {
+  display: inline;
+}
+
+@media (max-width: 720px) {
+  .recitation-paper {
+    padding: 28px 20px 36px;
+  }
+  
+  .recitation-ayahs {
+    font-size: 1.5rem;
+    line-height: 2.2;
+  }
+  
+  .recitation-ayah-number {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}

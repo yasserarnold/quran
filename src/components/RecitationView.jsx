@@ -14,10 +14,8 @@ export default function RecitationView({
 }) {
   const [isListening, setIsListening] = useState(false);
   const [matchedWords, setMatchedWords] = useState([]);
-  const [errorWord, setErrorWord] = useState(null); // For visual feedback of error
   
   const recognitionRef = useRef(null);
-  const audioCtxRef = useRef(null);
   const matchedCountRef = useRef(0);
 
   const targetWords = useMemo(() => {
@@ -44,7 +42,6 @@ export default function RecitationView({
     setMatchedWords([]);
     matchedCountRef.current = 0;
     setIsListening(false);
-    setErrorWord(null);
     if (recognitionRef.current) recognitionRef.current.stop();
   }, [targetWords]);
 
@@ -153,13 +150,11 @@ export default function RecitationView({
           matchedCountRef.current++;
           setMatchedWords(prev => [...prev, target]);
           wordsConsumedInCurrentResult++;
-          setErrorWord(null);
           i++;
           continue;
         }
 
         // Check if current + next word(s) combine to match expected
-        // This handles cases where speech splits "أَوَآبَاؤُنَا" into "أو آباؤنا"
         let combined = word;
         let lookahead = 1;
         let foundCombinedMatch = false;
@@ -168,11 +163,9 @@ export default function RecitationView({
           combined += validWords[i + lookahead];
           const normalizedCombined = normalizeForMatching(combined);
           if (normalizedCombined === expected || fuzzyMatch(normalizedCombined, expected)) {
-            // Found a match by combining words
             matchedCountRef.current++;
             setMatchedWords(prev => [...prev, target]);
             wordsConsumedInCurrentResult += lookahead + 1;
-            setErrorWord(null);
             i += lookahead + 1;
             foundCombinedMatch = true;
             break;
@@ -183,14 +176,12 @@ export default function RecitationView({
         if (foundCombinedMatch) continue;
 
         // Check if word is a prefix of expected (partial speech)
-        if (expected.startsWith(word) && word.length >= 2) {
-          // Wait for more input - don't error on partial matches
-          if (!isFinal) break;
+        if (expected.startsWith(word) && word.length >= 2 && !isFinal) {
+          break;
         }
 
         // Check if expected starts with word (word is first part of expected)
         if (expected.startsWith(word) && i === validWords.length - 1) {
-          // Word could be start of a split, wait
           break;
         }
 
@@ -199,23 +190,13 @@ export default function RecitationView({
           matchedCountRef.current++;
           setMatchedWords(prev => [...prev, target]);
           wordsConsumedInCurrentResult++;
-          setErrorWord(null);
           i++;
           continue;
         }
 
-        // For short words or interim results, just skip without error
-        if (word.length <= 3 || !isFinal) {
-          i++;
-          wordsConsumedInCurrentResult++;
-          continue;
-        }
-
-        // Only show error for very clear mismatches on final results
-        // No sound - just visual indicator
-        setErrorWord(word);
-        wordsConsumedInCurrentResult++;
+        // Skip non-matching words silently
         i++;
+        wordsConsumedInCurrentResult++;
       }
       
       // Auto-stop if done
@@ -314,12 +295,6 @@ export default function RecitationView({
                  </div>
              )}
          </div>
-         
-         {errorWord && isListening && (
-            <div className="recitation-feedback error-shake">
-                خطأ: سمعت "{errorWord}"
-            </div>
-         )}
       </div>
     </div>
   );

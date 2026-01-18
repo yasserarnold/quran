@@ -83,7 +83,7 @@ export default function MushafView({
             </span>
           </div>
           
-          {selectedSurah !== 9 && (
+          {selectedSurah !== 9 && selectedSurah !== 1 && (
              <div className="mushaf__basmala" style={{ fontFamily: 'Amiri', fontSize: '2rem', marginBottom: '24px' }}>
                بسم الله الرحمن الرحيم
              </div>
@@ -116,7 +116,7 @@ export default function MushafView({
         </div>
       ) : (
         <>
-            {selectedSurah !== 9 && (
+            {selectedSurah !== 9 && selectedSurah !== 1 && (
                  <div className="mushaf__basmala" style={{ fontFamily: 'Amiri', fontSize: '2rem', margin: '16px auto 24px', textAlign: 'center', color: 'var(--accent-2)' }}>
                    بسم الله الرحمن الرحيم
                  </div>

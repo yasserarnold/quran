@@ -359,9 +359,10 @@ export default function App() {
             numberInSurah: ayah.numberInSurah,
             audio: ayah.audio,
           }));
-        setAudioQueue(audioItems.filter((item) => item.audio));
+        const filteredAudioItems = audioItems.filter((item) => item.audio);
+        setAudioQueue(filteredAudioItems);
         if (startAyah) {
-          const startIndex = audioItems.findIndex(
+          const startIndex = filteredAudioItems.findIndex(
             (item) => item.numberInSurah === startAyah
           );
           setAudioIndex(startIndex === -1 ? 0 : startIndex);
@@ -379,7 +380,7 @@ export default function App() {
   useEffect(() => {
     if (!selectedReciter || !rangeNumbers.length) return;
     handleLoadAudio();
-  }, [selectedReciter]);
+  }, [selectedReciter, selectedSurah, rangeStart, rangeEnd]);
 
   useEffect(() => {
     if (!audioQueue.length || !audioRef.current) return;

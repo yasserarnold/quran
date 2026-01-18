@@ -45,45 +45,7 @@ export default function RecitationView({
     if (recognitionRef.current) recognitionRef.current.stop();
   }, [targetWords]);
 
-  const playErrorSound = () => {
-    try {
-      if (!audioCtxRef.current) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtxRef.current = new AudioContext();
-      }
-      const ctx = audioCtxRef.current;
-      if (!ctx) return;
-      if (ctx.state === "suspended") ctx.resume();
-      
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(130, ctx.currentTime); 
-      osc.frequency.exponentialRampToValueAtTime(65, ctx.currentTime + 0.3);
-      
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const startListening = () => {
-    // Initialize Audio Context on user gesture to ensure playback is allowed
-    if (!audioCtxRef.current) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtxRef.current = new AudioContext();
-    }
-    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-        audioCtxRef.current.resume();
-    }
-
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Speech) {
       alert("عذراً، المتصفح لا يدعم التعرف الصوتي.");
